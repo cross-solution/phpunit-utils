@@ -1,0 +1,12 @@
+# Text-Editor backup files
+*~
+
+# ignore dependencies
+vendor
+
+# ignore test/coverage reports
+test/coverage
+
+# Ignore IDEs
+.idea
+.atom
