@@ -1,0 +1,33 @@
+{
+  "name": "cross-solution/phpunit-utils",
+  "description": "Utilities to aid in writing unit tests with the PHPUnit Framework",
+  "license": "MIT",
+  "authors": [{
+    "name": "Mathias Gelhausen",
+    "email": "gelhausen@cross-solution.de"
+  }],
+  "keywords": [
+    "phpunit", "utilities", "helper", "testing"
+  ],
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": false
+  },
+  "require": {
+    "php": ">=7.1",
+    "phpunit/phpunit": "^5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cross\\TestUtils\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Cross\\TestUtilsTest\\": "test/TestUtilsTest"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  }
+}
