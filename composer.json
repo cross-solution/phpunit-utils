@@ -29,5 +29,9 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit"
+  },
+  "require-dev": {
+    "php-mock/php-mock-prophecy": "^0.0.2",
+    "psr/container": "^1.0"
   }
 }
