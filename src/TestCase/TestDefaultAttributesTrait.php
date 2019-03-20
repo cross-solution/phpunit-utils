@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
+use Cross\TestUtils\Utils\Target;
+
 /**
  * Tests the target for default attribute values.
  *
@@ -27,7 +30,6 @@ namespace Cross\TestUtils\TestCase;
 trait TestDefaultAttributesTrait
 {
     use AssertDefaultAttributesValuesTrait;
-    use GetTargetInstanceTrait;
 
     /**
      * @testdox Defines correct default attribute values.
@@ -35,17 +37,16 @@ trait TestDefaultAttributesTrait
      */
     public function testDefaultAttributes(): void
     {
-        $errTmpl = __TRAIT__ . ': ' . get_class($this);
-
-        if (!property_exists($this, 'defaultAttributes')) {
-            throw new \PHPUnit_Framework_Exception($errTmpl . ' must define the property "defaultAttributes".');
+        if (!property_exists($this, 'defaultAttributes') || !is_array($this->defaultAttributes)) {
+            throw InvalidUsageException::fromTrait(
+                __TRAIT__,
+                __CLASS__,
+                'The property "$defaultAttributes" is not defined or not an array.'
+            );
         }
 
-        if (!is_array($this->defaultAttributes)) {
-            throw new \PHPUnit_Framework_Exception($errTmpl . ': Property "defaultAttributes" must be an array');
-        }
-
-        $target = $this->getTargetInstance(
+        $target = Target::get(
+            $this,
             ['getDefaultAttributesTarget', 'getTarget'],
             ['defaultAttributesTarget', 'target'],
             'defaultAttributes'

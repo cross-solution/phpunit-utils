@@ -12,12 +12,11 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\TestCase\AssertUsesTraitsTrait;
-use Cross\TestUtils\TestCase\GetTargetInstanceTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\TestUsesTraitsTrait
- * 
+ *
  * @covers \Cross\TestUtils\TestCase\TestUsesTraitsTrait
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  *
@@ -32,7 +31,7 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
         $target = new \ReflectionClass(TestUsesTraitsTrait::class);
 
         static::assertEquals(
-            [AssertUsesTraitsTrait::class, GetTargetInstanceTrait::class],
+            [AssertUsesTraitsTrait::class],
             $target->getTraitNames()
         );
     }
@@ -40,7 +39,7 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
     public function testThrowsExceptionIfPropertyDoesNotExist()
     {
         $this->expectException(\PHPUnit_Framework_Exception::class);
-        $this->expectExceptionMessage('must define');
+        $this->expectExceptionMessage('is not defined');
 
         $target = new class { use TestUsesTraitsTrait; };
 
@@ -50,7 +49,7 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
     public function testThrowsExceptionIfPropertyIsNotAnArray()
     {
         $this->expectException(\PHPUnit_Framework_Exception::class);
-        $this->expectExceptionMessage('be an array');
+        $this->expectExceptionMessage('not an array');
 
         $target = new class { use TestUsesTraitsTrait; public $usesTraits = 'string'; };
 
@@ -73,15 +72,7 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
 
             public $usesTraits = ['one', 'two'];
 
-            public $getTargetInstanceArgs;
-
             public static $assertUsesTraitsArgs;
-
-            public function getTargetInstance()
-            {
-                $this->getTargetInstanceArgs = func_get_args();
-                return $this->target;
-            }
 
             public static function assertUsesTraits()
             {
@@ -91,15 +82,6 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
 
 
         $target->testUsesTraits();
-
-        static::assertEquals(
-            [
-                ['getUsesTraitsTarget', 'getTarget'],
-                ['usesTraitsTarget', 'target'],
-                'usesTraits'
-            ],
-            $target->getTargetInstanceArgs
-        );
 
         static::assertEquals(
             [

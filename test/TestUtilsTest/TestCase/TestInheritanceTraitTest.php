@@ -11,10 +11,11 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
+
 use Cross\TestUtils\TestCase\AssertInheritanceTrait;
 use Cross\TestUtils\TestCase\TestInheritanceTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
-use Cross\TestUtils\TestCase\GetTargetInstanceTrait;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\TestInheritanceTrait
@@ -33,13 +34,12 @@ class TestInheritanceTraitTest extends \PHPUnit_Framework_TestCase
     private $usesTraits = [
         'target' => TestInheritanceTrait::class,
         AssertInheritanceTrait::class,
-        GetTargetInstanceTrait::class
     ];
 
     public function testThrowsExceptionIfPropertyDoesNotExist()
     {
-        $this->expectException(\PHPUnit_Framework_Exception::class);
-        $this->expectExceptionMessage('must define');
+        $this->expectException(InvalidUsageException::class);
+        $this->expectExceptionMessage('is not defined');
 
         $target = new class
         {
@@ -51,8 +51,8 @@ class TestInheritanceTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionIfPropertyIsNotAnArray()
     {
-        $this->expectException(\PHPUnit_Framework_Exception::class);
-        $this->expectExceptionMessage('be an array');
+        $this->expectException(InvalidUsageException::class);
+        $this->expectExceptionMessage('not an array');
 
         $target = new class
         {
@@ -81,15 +81,7 @@ class TestInheritanceTraitTest extends \PHPUnit_Framework_TestCase
 
             public $inheritance = ['one', 'two'];
 
-            public $getTargetInstanceArgs;
-
             public static $assertInheritanceArgs;
-
-            public function getTargetInstance()
-            {
-                $this->getTargetInstanceArgs = func_get_args();
-                return $this->target;
-            }
 
             public static function assertInheritance()
             {
@@ -99,15 +91,6 @@ class TestInheritanceTraitTest extends \PHPUnit_Framework_TestCase
 
 
         $target->testInheritance();
-
-        static::assertEquals(
-            [
-                ['getInheritanceTarget', 'getTarget'],
-                ['inheritanceTarget', 'target'],
-                'inheritance'
-            ],
-            $target->getTargetInstanceArgs
-        );
 
         static::assertEquals(
             [

@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
+use Cross\TestUtils\Utils\Target;
+
 /**
  * Uses traits test.
  *
@@ -23,14 +26,13 @@ namespace Cross\TestUtils\TestCase;
  * '$usesTraitsTarget' or '$target'.
  *
  *
- * @property object|string $target
  * @property string[]      $usesTraits
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  */
 trait TestUsesTraitsTrait
 {
-    use AssertUsesTraitsTrait, GetTargetInstanceTrait;
+    use AssertUsesTraitsTrait;
 
     /**
      * @testdox Uses required traits.
@@ -38,19 +40,16 @@ trait TestUsesTraitsTrait
      */
     public function testUsesTraits(): void
     {
-        if (!property_exists($this, 'usesTraits')) {
-            throw new \PHPUnit_Framework_Exception(__TRAIT__ . ': ' . get_class($this)
-                                                   . ' must define the property "usesTraits".');
-        }
-
-        if (!is_array($this->usesTraits)) {
-            throw new \PHPUnit_Framework_Exception(
-                __TRAIT__ . ': ' . get_class($this)
-                . ': Property "usesTraits" must be an array.'
+        if (!property_exists($this, 'usesTraits') || !is_array($this->usesTraits)) {
+            throw InvalidUsageException::fromTrait(
+                __TRAIT__,
+                __CLASS__,
+                'Property "$usesTraits" is not defined or not an array.'
             );
         }
 
-        $target = $this->getTargetInstance(
+        $target = Target::get(
+            $this,
             ['getUsesTraitsTarget', 'getTarget'],
             ['usesTraitsTarget', 'target'],
             'usesTraits'

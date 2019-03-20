@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
+use Cross\TestUtils\Utils\Target;
+
 /**
  * Inheritance test.
  *
@@ -29,7 +32,7 @@ namespace Cross\TestUtils\TestCase;
  */
 trait TestInheritanceTrait
 {
-    use AssertInheritanceTrait, GetTargetInstanceTrait;
+    use AssertInheritanceTrait;
 
     /**
      * @testdox Extends correct parent and implements required interfaces.
@@ -37,17 +40,16 @@ trait TestInheritanceTrait
      */
     public function testInheritance(): void
     {
-        $errTmpl = __TRAIT__ . ': ' . get_class($this);
-
-        if (!property_exists($this, 'inheritance')) {
-            throw new \PHPUnit_Framework_Exception($errTmpl . ' must define the property "inheritance".');
+        if (!property_exists($this, 'inheritance') || !is_array($this->inheritance)) {
+            throw InvalidUsageException::fromTrait(
+                __TRAIT__,
+                __CLASS__,
+                'Property "$inheritance" is not defined or is not an array.'
+            );
         }
 
-        if (!is_array($this->inheritance)) {
-            throw new \PHPUnit_Framework_Exception($errTmpl . ': Property "inheritance" must be an array.');
-        }
-
-        $target = $this->getTargetInstance(
+        $target = Target::get(
+            $this,
             ['getInheritanceTarget', 'getTarget'],
             ['inheritanceTarget', 'target'],
             'inheritance'

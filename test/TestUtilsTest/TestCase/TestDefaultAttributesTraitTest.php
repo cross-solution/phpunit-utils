@@ -12,13 +12,12 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\TestCase\AssertDefaultAttributesValuesTrait;
-use Cross\TestUtils\TestCase\GetTargetInstanceTrait;
 use Cross\TestUtils\TestCase\TestDefaultAttributesTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\TestDefaultAttributesTrait
- * 
+ *
  * @covers \Cross\TestUtils\TestCase\TestDefaultAttributesTrait
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  *
@@ -30,12 +29,12 @@ class TestDefaultAttributesTraitTest extends \PHPUnit_Framework_TestCase
 {
     use TestUsesTraitsTrait;
 
-    private $usesTraits = [ 'target' => TestDefaultAttributesTrait::class, AssertDefaultAttributesValuesTrait::class, GetTargetInstanceTrait::class ];
+    private $usesTraits = [ 'target' => TestDefaultAttributesTrait::class, AssertDefaultAttributesValuesTrait::class ];
 
     public function testThrowsExceptionIfPropertyDoesNotExist()
     {
         $this->expectException(\PHPUnit_Framework_Exception::class);
-        $this->expectExceptionMessage('must define');
+        $this->expectExceptionMessage('$defaultAttributes" is not defined');
 
         $target = new class { use TestDefaultAttributesTrait; };
 
@@ -45,7 +44,7 @@ class TestDefaultAttributesTraitTest extends \PHPUnit_Framework_TestCase
     public function testThrowsExceptionIfPropertyIsNotAnArray()
     {
         $this->expectException(\PHPUnit_Framework_Exception::class);
-        $this->expectExceptionMessage('be an array');
+        $this->expectExceptionMessage('not an array');
 
         $target = new class { use TestDefaultAttributesTrait; public $defaultAttributes = 'string'; };
 
@@ -68,15 +67,7 @@ class TestDefaultAttributesTraitTest extends \PHPUnit_Framework_TestCase
 
             public $defaultAttributes = ['one', 'two'];
 
-            public $getTargetInstanceArgs;
-
             public static $assertDefaultAttributesValuesArgs;
-
-            public function getTargetInstance()
-            {
-                $this->getTargetInstanceArgs = func_get_args();
-                return $this->target;
-            }
 
             public static function assertDefaultAttributesValues()
             {
@@ -86,15 +77,6 @@ class TestDefaultAttributesTraitTest extends \PHPUnit_Framework_TestCase
 
 
         $target->testDefaultAttributes();
-
-        static::assertEquals(
-            [
-                ['getDefaultAttributesTarget', 'getTarget'],
-                ['defaultAttributesTarget', 'target'],
-                'defaultAttributes'
-            ],
-            $target->getTargetInstanceArgs
-        );
 
         static::assertEquals(
             [

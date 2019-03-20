@@ -11,14 +11,12 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
-use Cross\TestUtils\TestCase\GetTargetInstanceTrait;
-use Cross\TestUtils\TestCase\SimpleModel;
 use Cross\TestUtils\TestCase\TestSetterAndGetterTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\TestSetterAndGetterTrait
- * 
+ *
  * @covers \Cross\TestUtils\TestCase\TestSetterAndGetterTrait
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  *
@@ -30,7 +28,7 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
 {
     use TestUsesTraitsTrait;
 
-    private $usesTraits = ['target' => TestSetterAndGetterTrait::class, GetTargetInstanceTrait::class];
+    private $usesTraits = ['target' => TestSetterAndGetterTrait::class];
 
     public function testSetterAndGetterDataReturnsPropertyValue()
     {
@@ -48,13 +46,13 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testReturnsNullIfSpecIsNotGiven()
     {
-        $target = new class 
-        { 
-            use TestSetterAndGetterTrait; 
-            public $normalizeCalled = false; 
-            public function setterAndGetterNormalizeSpec($spec, $name, $target) 
-            { 
-                $this->normalizeCalled = true; 
+        $target = new class
+        {
+            use TestSetterAndGetterTrait;
+            public $normalizeCalled = false;
+            public function setterAndGetterNormalizeSpec($spec, $name, $target)
+            {
+                $this->normalizeCalled = true;
             }
         };
 

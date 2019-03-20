@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\TestCase;
 
+use Cross\TestUtils\Utils\Target;
+
 /**
  * Trait for testing setters and getters of the SUT.
  *
@@ -96,8 +98,6 @@ namespace Cross\TestUtils\TestCase;
  */
 trait TestSetterAndGetterTrait
 {
-    use GetTargetInstanceTrait;
-
     /**
      * Data provider for the properties test.
      *
@@ -122,7 +122,8 @@ trait TestSetterAndGetterTrait
             return;
         }
 
-        $target = $this->getTargetInstance(
+        $target = Target::get(
+            $this,
             ['getSetterAndGetterTarget', 'getTarget'],
             ['setterAndGetterTarget', 'target'],
             'setterAndGetter',
@@ -159,7 +160,7 @@ trait TestSetterAndGetterTrait
 
         // Test property
         if (null !== $spec['property']) {
-            list ($propertyName, $propertyValue) = $spec['property'];
+            [$propertyName, $propertyValue] = $spec['property'];
             if ('__VALUE__' == $propertyValue) {
                 $propertyValue = $value;
             }
