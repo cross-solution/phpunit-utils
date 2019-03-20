@@ -11,7 +11,13 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
+
 use Cross\TestUtils\TestCase\ContainerDoubleTrait;
+
+use Prophecy\Argument;
+
+use phpmock\prophecy\PHPProphet;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\ContainerDoubleTrait
@@ -91,6 +97,18 @@ class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
                     'reveal' => [[]]
                 ]
             ],
+            [
+                [
+                    'name' => false,
+                ],
+                [
+                    'get' => [['name']],
+                    'willThrow' => [['ExceptionMock']],
+                    'reveal' => [[]],
+                    'has' => [['name']],
+                    'willReturn' => [[false]],
+                ],
+            ],
         ];
     }
 
@@ -102,13 +120,15 @@ class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreatesContainerDouble(array $services, array $expect)
     {
+        $scope = $this;
         $target = new class
         {
             use ContainerDoubleTrait;
 
             public function prophesize($class)
             {
-                return new class($class)
+
+                return new class($class) extends \Prophecy\Prophecy\ObjectProphecy
                 {
                     public $name;
                     public $calls = [];
@@ -124,15 +144,41 @@ class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
 
                         return $this;
                     }
+
+                    public function reveal()
+                    {
+                        if (\Psr\Container\NotFoundExceptionInterface::class == $this->name) {
+                            return 'ExceptionMock';
+                        }
+
+                        $this->calls['reveal'][] = [];
+
+                        return $this;
+                    }
                 };
             }
         };
 
         $actual = $target->createContainerDouble($services);
 
-        /** @noinspection PhpUndefinedNamespaceInspection */
-        /** @noinspection PhpUndefinedClassInspection */
         static::assertEquals(\Psr\Container\ContainerInterface::class, $actual->name);
         static::assertEquals($expect, $actual->calls);
+    }
+
+    public function testThrowsExceptionIfInterfaceIsNotDefined()
+    {
+
+        $func = (new PHPProphet)->prophesize('Cross\TestUtils\TestCase');
+        $func->interface_exists(Argument::any())->willReturn(false);
+        $func->reveal();
+
+        $this->expectException(InvalidUsageException::class);
+
+        $target = new class {
+            use ContainerDoubleTrait;
+        };
+
+        $target->createContainerProphecy();
+
     }
 }
