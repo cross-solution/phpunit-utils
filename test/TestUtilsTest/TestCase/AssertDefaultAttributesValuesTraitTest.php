@@ -7,7 +7,7 @@
  * @copyright  2019 Cross Solution <http://cross-solution.de>
  */
 
-declare(strict_type=1);
+declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
