@@ -41,6 +41,13 @@ class TemplatedMessageExceptionTraitTest extends \PHPUnit_Framework_TestCase
         static::assertSame($ex, $target->getPrevious());
     }
 
+    public function testFromClass()
+    {
+        $target = InvalidUsageException::fromClass('CLASS', '%s', 'value1');
+
+        static::assertEquals('CLASS: value1', $target->getMessage());
+    }
+
     public function testFromTrait()
     {
         $target = InvalidUsageException::fromTrait('TRAIT', 'CLASS', '%s', 'value1');
