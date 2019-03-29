@@ -15,7 +15,7 @@ use Cross\TestUtils\Exception\InvalidUsageException;
 use Prophecy\Prophecy\ObjectProphecy;
 
 /**
- * Creates a service manager prophecy or double with configured services.
+ * Creates a service container prophecy or double with configured services.
  *
  * @method \Prophecy\Prophecy\ObjectProphecy prophesize(string $classOrInterface)
  *
@@ -27,67 +27,118 @@ trait ContainerDoubleTrait
      * Prohesizes a container interface.
      *
      * Pass in services as iterable:
-     * <pre>
+     * ```
      * [
+     *      // short
      *      'name' => service,
+     *
+     *      // verbose style
      *      'name' => [
      *           'service' => service,
+     *           'args_get' => array: Additional arguments the get
+     *                                method is called with
+     *           'args_has' => array: Additional arguments the has
+     *                                method is called with
      *           'count_get' => int,
      *           'count_has' => int,
+     *           'promise' => string: The promise method for the
+     *                                prophecy
+     *                                * willReturn (default)
+     *                                * willThrow
+     *                                * will
+     *                                * _etc._
      *      ],
+     *
+     *      // compact style
      *      'name' => [service{, count_get{, count_has}}],
+     *
+     *      // mixed (example)
+     *      'name' => [service, count_get, 'args_get' => ['arg'], count_has]
      * ]
-     * </pre>
+     * ```
      *
-     * Passing the boolean value 'false' as service will cause the following:
-     * - Calling has(service) will return false.
-     * - Calling get(service) will throw an exception.
+     * Passing the boolean value _false_ as service will cause the following:
+     * * Calling has(service) will return false.
+     * * Calling get(service) will throw an exception.
      *
+     * ### Options
+     * ```
+     * [
+     *      'target' => FQCN of the Container class
+     *                  default: \Psr\Container\ContainerInterface
+     *
+     *      'arguments' => array of constructor arguments for the container
+     *      'implements' => array of interfaces the container
+     *                      should implement
+     *      'args_get' => default arguments for the get method
+     *                    for each service
+     *      'args_has' => default arguments for the has method
+     *                    for each service
+     *      'promise' => default promise method for each service
+     * ]
+     * ```
      * @param iterable $services
+     * @param array    $options
      *
      * @return ObjectProphecy
      */
-    public function createContainerProphecy(iterable $services = []): ObjectProphecy
+    public function createContainerProphecy(iterable $services = [], array $options = []): ObjectProphecy
     {
-        if (!interface_exists(\Psr\Container\ContainerInterface::class)) {
+        $target = $options['target'] ?? \Psr\Container\ContainerInterface::class;
+
+        if (!interface_exists($target) && !class_exists($target)) {
             throw InvalidUsageException::fromTrait(
                 __TRAIT__,
-                get_class($this),
-                'Cannot create container double. Interface %s does not exist.',
-                \Psr\Container\ContainerInterface::class
+                __CLASS__,
+                'Cannot create container double. Interface or class %s does not exist.',
+                $target
             );
         }
 
-        $container = $this->prophesize(\Psr\Container\ContainerInterface::class);
+        $container = $this->prophesize($target);
+
+        if (isset($options['arguments'])) {
+            $container->willBeConstructedWith($options['arguments']);
+        }
+
+        if (isset($options['implements'])) {
+            foreach ((array) $options['implements'] as $interface) {
+                $container->willImplement($interface);
+            }
+        }
 
         foreach ($services as $name => $spec) {
             if (!is_array($spec)) {
                 $spec = ['service' => $spec];
             }
 
-            $countGet = $spec['count_get'] ?? $spec[1] ?? 0;
-            $countHas = $spec['count_has'] ?? $spec[2] ?? 0;
-            $service  = $spec['service'] ?? $spec[0] ?? null;
+            $service = $spec['service'] ?? $spec[0] ?? null;
+            $count   = $spec['count_get'] ?? $spec[1] ?? $options['count_get'] ?? 0;
+            $args    = $spec['args_get'] ?? $options['args_get'] ?? [];
 
             /** @var \Prophecy\Prophecy\MethodProphecy $method */
-            $method = $container->get($name);
+            $method = $container->get($name, ...$args);
 
             if (false === $service) {
                 $ex = $this->prophesize(\Psr\Container\NotFoundExceptionInterface::class)->reveal();
                 $method->willThrow($ex);
             } else {
-                $method->willReturn($service);
+                $promise = $spec['promise'] ?? $options['promise'] ?? 'willReturn';
+                $method->$promise($service);
             }
 
-            if ($countGet) {
-                $method->shouldBeCalledTimes($countGet);
+            if ($count) {
+                $method->shouldBeCalledTimes($count);
             }
 
-            $method = $container->has($name);
+            $args   = $spec['args_has'] ?? $options['args_has'] ?? [];
+            $count  = $spec['count_has'] ?? $spec[2] ?? $options['count_has'] ?? 0;
+            $method = $container->has($name, ...$args);
+
             $method->willReturn(false !== $service);
 
-            if ($countHas) {
-                $method->shouldBeCalledTimes($countHas);
+            if ($count) {
+                $method->shouldBeCalledTimes($count);
             }
         }
 
@@ -96,14 +147,16 @@ trait ContainerDoubleTrait
 
     /**
      * Creates a container interface double.
+     * see {@link createContainerProphecy()}
      *
-     * @param iterable $services The services the container should provide
-     *                           see {@link createContainerProphecy()}
+     * @param iterable $services
+     * @param array $options
      *
+     * @see createContainerProphecy()
      * @return object The revealed container double
      */
-    public function createContainerDouble(iterable $services = []): object
+    public function createContainerDouble(iterable $services = [], array $options = []): object
     {
-        return $this->createContainerProphecy($services)->reveal();
+        return $this->createContainerProphecy($services, $options)->reveal();
     }
 }

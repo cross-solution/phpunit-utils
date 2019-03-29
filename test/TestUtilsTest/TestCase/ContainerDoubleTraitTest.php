@@ -12,11 +12,8 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
-
 use Cross\TestUtils\TestCase\ContainerDoubleTrait;
-
 use Prophecy\Argument;
-
 use phpmock\prophecy\PHPProphet;
 
 /**
@@ -112,16 +109,9 @@ class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    /**
-     * @dataProvider servicesProvider
-     *
-     * @param array $services
-     * @param array $expect
-     */
-    public function testCreatesContainerDouble(array $services, array $expect)
+    private function getConcreteTraitClass()
     {
-        $scope = $this;
-        $target = new class
+        return new class
         {
             use ContainerDoubleTrait;
 
@@ -155,21 +145,177 @@ class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
 
                         return $this;
                     }
+
+                    public function willBeConstructedWith(array $args = null)
+                    {
+                        $this->__call(__FUNCTION__, [$args]);
+                    }
+
+                    public function willImplement($interface)
+                    {
+                        $this->__call(__FUNCTION__, [$interface]);
+                    }
                 };
             }
         };
 
+    }
+
+    /**
+     * @dataProvider servicesProvider
+     *
+     * @param array $services
+     * @param array $expect
+     */
+    public function testCreatesContainerDouble(array $services, array $expect)
+    {
+        $target = $this->getConcreteTraitClass();
         $actual = $target->createContainerDouble($services);
 
         static::assertEquals(\Psr\Container\ContainerInterface::class, $actual->name);
         static::assertEquals($expect, $actual->calls);
     }
 
-    public function testThrowsExceptionIfInterfaceIsNotDefined()
+    public function servicesOptionsProvider()
+    {
+        $target     = new class {};
+        $targetFqcn = get_class($target);
+        return [
+            [
+                [],
+                ['target' => $targetFqcn],
+                [],
+            ],
+            [
+                [],
+                ['implements' => 'SomeInterface'],
+                [['willImplement', ['SomeInterface']]]
+            ],
+            [
+                [],
+                ['implements' => ['SomeInterface', 'Other']],
+                [['willImplement', ['SomeInterface'], ['willIpmlement', ['Other']]]],
+            ],
+            [
+                [],
+                ['arguments' => ['arg1', 'arg2']],
+                [['willBeConstructedWith', [['arg1', 'arg2']]]],
+            ],
+            [
+                [
+                    'name' => [
+                        'service',
+                        'args_get' => ['arg1', 'arg2'],
+                        'args_has' => ['has1', 'has2'],
+                    ]
+                ],
+                [],
+                [
+                    ['get', ['name', 'arg1', 'arg2']],
+                    ['has', ['name', 'has1', 'has2']],
+                ],
+            ],
+            // global options
+            [
+                [
+                    'name' => [
+                        'service',
+                    ]
+                ],
+                [
+                    'args_get' => ['global1', 'global2'],
+                    'args_has' => ['hasglobal1', 'hasglobal2'],
+                ],
+                [
+                    ['get', ['name', 'global1', 'global2']],
+                    ['has', ['name', 'hasglobal1', 'hasglobal2']],
+                ],
+            ],
+            // global options override
+            [
+                [
+                    'name' => [
+                        'service',
+                        'args_get' => ['arg1', 'arg2'],
+                        'args_has' => ['has1', 'has2'],
+                    ]
+                ],
+                [
+                    'args_get' => ['global1', 'global2']
+                ],
+                [
+                    ['get', ['name', 'arg1', 'arg2']],
+                    ['has', ['name', 'has1', 'has2']],
+                ],
+            ],
+            // promises
+            [
+                [
+                    'name' => [
+                        'service',
+                        'promise' => 'will'
+                    ]
+                ],
+                [],
+                [
+                    ['will', ['service']]
+                ]
+            ],
+            // global promise
+            [
+                [
+                    'name' => [
+                        'service',
+                    ]
+                ],
+                ['promise' => 'will'],
+                [
+                    ['will', ['service']]
+                ]
+            ],
+            [
+                [
+                    'name' => [
+                        'service',
+                        'promise' => 'will'
+                    ]
+                ],
+                ['promise' => 'willReturn'],
+                [
+                    ['will', ['service']]
+                ]
+            ],
+
+        ];
+    }
+
+    /**
+     * @dataProvider servicesOptionsProvider
+     * @param  array  $services
+     * @param  array  $options
+     * @param  array  $expect
+     * @return void
+     */
+    public function testCreatesContainerProphecyWithOptions(array $services, array $options, array $expect)
+    {
+        $target = $this->getConcreteTraitClass();
+        $actual = $target->createContainerProphecy($services, $options);
+
+        static::assertEquals($options['target'] ?? \Psr\Container\ContainerInterface::class, $actual->name);
+        foreach ($expect as $spec) {
+            $method = $spec[0];
+            static::assertArrayHasKey($method, $actual->calls);
+            $actualArgs = $actual->calls[$method];
+            static::assertContains($spec[1], $actualArgs);
+        }
+    }
+
+    public function testThrowsExceptionIfInterfaceOrClassIsNotDefined()
     {
 
         $func = (new PHPProphet)->prophesize('Cross\TestUtils\TestCase');
         $func->interface_exists(Argument::any())->willReturn(false);
+        $func->class_exists(Argument::any())->willReturn(false);
         $func->reveal();
 
         $this->expectException(InvalidUsageException::class);
@@ -179,6 +325,5 @@ class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
         };
 
         $target->createContainerProphecy();
-
     }
 }
