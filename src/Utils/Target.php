@@ -12,13 +12,48 @@ declare(strict_types=1);
 namespace Cross\TestUtils\Utils;
 
 /**
+ * Retrieves the SUT for a test from various sources of a context class.
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
- * @todo write tests
  */
 final class Target
 {
-
+    /**
+     * Get the SUT from various sources of a context class.
+     *
+     * __$methods__:
+     *   An array of method names. If one of that methods exists in the
+     *   context class, it is called
+     *   The methods can return one of the following:
+     *
+     *   * an object: is used as SUT
+     *   * an array:  {@link Instance::withMappedArguments()} is called with
+     *     the array and the context class, its return value is
+     *     returned as SUT.
+     *   * a string:  is returned to use as the FQCN od the SUT,
+     *     unless $forceObject is true - then it's treated like
+     *     above.
+     *
+     * __$properties__:
+     *   An array of property names. If one of that property exists in the
+     *   context class, its value is used the same way as the return value
+     *   above.
+     *
+     * __$classesProperty__:
+     *   If the context class defines a class list array, you can
+     *   specify its name here, and if the SUT is not found yet, it will
+     *   take the element with the key 'target' or the first element and treat
+     *   it like a property value described above.
+     *   The element will be unset after the SUT creation.
+     *
+     * @param  object       $testcase        Context class
+     * @param  array        $methods
+     * @param  array        $properties
+     * @param  string|null  $classesProperty
+     * @param  bool         $forceObject     If true, an object is returned at any case
+     *
+     * @return string|object
+     */
     public static function get(
         object  $testcase,
         array   $methods,
@@ -28,12 +63,24 @@ final class Target
     ) {
         $testcaseReflection = new \ReflectionClass($testcase);
 
+        $createTarget = function ($target) use ($testcase, $forceObject) {
+            if (is_object($target)) {
+                return $target;
+            }
+            
+            if (!$forceObject && is_string($target) && '!' != $target{0}) {
+                return $target;
+            }
+
+            return Instance::withMappedArguments($target, $testcase);
+        };
+
         foreach ($methods as $method) {
             if ($testcaseReflection->hasMethod($method)) {
                 $testcaseMethod = $testcaseReflection->getMethod($method);
                 $testcaseMethod->setAccessible(true);
 
-                return self::create($testcaseMethod->invoke($testcase), $forceObject);
+                return $createTarget($testcaseMethod->invoke($testcase));
             }
         }
 
@@ -42,7 +89,7 @@ final class Target
                 $testcaseProperty = $testcaseReflection->getProperty($property);
                 $testcaseProperty->setAccessible(true);
 
-                return self::create($testcaseProperty->getValue($testcase), $forceObject);
+                return $createTarget($testcaseProperty->getValue($testcase));
             }
         }
 
@@ -56,10 +103,10 @@ final class Target
 
             if (is_array($propertyValue) && count($propertyValue)) {
                 if (isset($propertyValue['target'])) {
-                    $target = self::create($propertyValue['target'], $forceObject);
+                    $target = $createTarget($propertyValue['target']);
                     unset($propertyValue['target']);
                 } else {
-                    $target = self::create(array_shift($propertyValue), $forceObject);
+                    $target = $createTarget(array_shift($propertyValue));
                 }
 
                 $testcaseProperty->setValue($testcase, $propertyValue);
@@ -69,32 +116,5 @@ final class Target
         }
 
         throw new \PHPUnit_Framework_Exception('Could not find or create a target instance.');
-    }
-
-    /**
-     * Creates an instance or returns FQCN
-     *
-     * @param  string|array $spec
-     * @param  bool   $forceObject
-     * @return string|object
-     */
-    private static function create($spec, bool $forceObject)
-    {
-        if (is_array($spec)) {
-            $class = array_shift($spec);
-            return new $class(...$spec);
-        }
-
-        if (is_string($spec)) {
-            if (0 === strpos($spec, '!')) {
-                return new \ReflectionClass(substr($spec, 1));
-            }
-
-            if ($forceObject) {
-                return new $spec();
-            }
-        }
-
-        return $spec;
     }
 }

@@ -121,6 +121,24 @@ class TargetTest extends \PHPUnit_Framework_TestCase
         static::assertInstanceOf($class, $actual);
     }
 
+    public function testGetTargetIfAlreadyObject()
+    {
+        $object = new \stdClass;
+        $target = new class
+        {
+            public $object;
+            public function getTarget()
+            {
+                return $this->object;
+            }
+        };
+        $target->object = $object;
+
+        $actual = Target::get($target, ['getTarget'], []);
+
+        static::assertSame($object, $actual);
+    }
+
     public function testGetTargetInstanceForcedObject()
     {
         $target = new class
