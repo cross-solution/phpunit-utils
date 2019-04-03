@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
+
 use Cross\TestUtils\TestCase\TestSetterAndGetterTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 
@@ -37,11 +39,14 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
         static::assertEquals([['prop', 'value']], $target->setterAndGetterData());
     }
 
-    public function testSetterAndGetterDataReturnsEmptyArray()
+    public function testSetterAndGetterDataThrowsExceptionIfNotOverridden()
     {
         $target = new class { use TestSetterAndGetterTrait;};
 
-        static::assertEquals([], $target->setterAndGetterData());
+        $this->expectException(InvalidUsageException::class);
+        $this->expectExceptionMessage('$setterAndGetter is not defined');
+
+        $target->setterAndGetterData();
     }
 
     public function testReturnsNullIfSpecIsNotGiven()
@@ -105,6 +110,8 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
     {
         return [
             ['value', ['value' => 'value']],
+            [10, ['value' => 10]],
+            [true, ['value' => true]],
             [new \stdClass, 'Must be array'],
             [['property' => true], ['property' => ['prop', '__VALUE__']]],
             [['property' => ['test']], ['property' => ['prop', 'test']]],
@@ -215,7 +222,7 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
 
         if (is_array($expect)) {
             foreach ($expect as $key => $val) {
-                if ('__TARGET__' == $val) {
+                if ('__TARGET__' === $val) {
                     static::assertSame($target->target, $normalized[$key]);
                 } else {
                     static::assertEquals($val, $normalized[$key]);

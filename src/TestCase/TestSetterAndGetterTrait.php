@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\TestCase;
 
+use Cross\TestUtils\Exception\InvalidUsageException;
 use Cross\TestUtils\Utils\Target;
 
 /**
@@ -107,7 +108,15 @@ trait TestSetterAndGetterTrait
      */
     public function setterAndGetterData(): array
     {
-        return property_exists($this, 'setterAndGetter') ? $this->setterAndGetter : [];
+        if (!property_exists($this, 'setterAndGetter')) {
+            throw InvalidUsageException::fromTrait(
+                __TRAIT__,
+                __CLASS__,
+                'Property $setterAndGetter is not defined and method setterAndGetter is not overridden.'
+            );
+        }
+
+        return $this->setterAndGetter;
     }
 
     /**
@@ -198,7 +207,7 @@ trait TestSetterAndGetterTrait
             'exception' => null,
         ];
 
-        if (is_string($spec)) {
+        if (is_scalar($spec)) {
             $normalized['value'] = $spec;
             return $normalized;
         }
