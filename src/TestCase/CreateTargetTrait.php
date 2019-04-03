@@ -18,6 +18,8 @@ use Prophecy\Prophecy\ObjectProphecy;
  * @method ObjectProphecy prophesize(string $classOrInterface)
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ * @deprecated Prophecy does not allow partial mocking. Use CreateProphecyTrait instead
+ * @codeCoverageIgnore
  */
 trait CreateTargetTrait
 {
@@ -29,6 +31,7 @@ trait CreateTargetTrait
      * @param array  ...$args
      *
      * @return object
+     * @deprecated
      */
     public function createTarget(string $class, ...$args): object
     {
@@ -41,6 +44,7 @@ trait CreateTargetTrait
      * @param object|string $class
      *
      * @return \ReflectionClass
+     * @deprecated
      */
     public function createTargetReflection($class): \ReflectionClass
     {
@@ -79,6 +83,7 @@ trait CreateTargetTrait
      * @param array        $prophecies
      *
      * @return ObjectProphecy
+     * @deprecated
      */
     public function createTargetProphecy($class, array $prophecies = []): ObjectProphecy
     {
@@ -127,6 +132,7 @@ trait CreateTargetTrait
      * @param array        $prophecies
      *
      * @return object
+     * @deprecated
      */
     public function createTargetDouble($class, array $prophecies = []): object
     {
