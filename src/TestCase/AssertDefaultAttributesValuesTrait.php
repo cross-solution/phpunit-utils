@@ -20,6 +20,9 @@ use Cross\TestUtils\Constraint\DefaultAttributesValues;
  * @method static void assertThat($value, \PHPUnit_Framework_Constraint $constraint, $message = '')
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ *
+ * @deprecated Testing internal object state is bad practice.
+ *             (see: https://thephp.cc/news/2019/02/help-my-tests-stopped-working#assertions-and-non-public-attributes)
  */
 trait AssertDefaultAttributesValuesTrait
 {

@@ -15,6 +15,8 @@ namespace Cross\TestUtils\Constraint;
  * Constraint to assert the existence and default values of attributes.
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ * @deprecated Testing internal object state is bad practice.
+ *             (see: https://thephp.cc/news/2019/02/help-my-tests-stopped-working#assertions-and-non-public-attributes)
  */
 class DefaultAttributesValues extends \PHPUnit_Framework_Constraint
 {

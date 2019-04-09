@@ -26,6 +26,8 @@ use Cross\TestUtils\Utils\Target;
  * @property array $defaultAttributes
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ * @deprecated Testing internal object state is bad practice.
+ *             (see: https://thephp.cc/news/2019/02/help-my-tests-stopped-working#assertions-and-non-public-attributes)
  */
 trait TestDefaultAttributesTrait
 {
