@@ -11,7 +11,7 @@
   ],
   "prefer-stable": true,
   "config": {
-    "optimize-autoloader": false
+    "optimize-autoloader": true
   },
   "require": {
     "php": ">=7.1",
