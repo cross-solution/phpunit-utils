@@ -13,6 +13,7 @@ namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
 use Cross\TestUtils\TestCase\ContainerDoubleTrait;
+use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use phpmock\prophecy\PHPProphet;
 
@@ -26,7 +27,7 @@ use phpmock\prophecy\PHPProphet;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.ContainerDoubleTrait
  */
-class ContainerDoubleTraitTest extends \PHPUnit_Framework_TestCase
+class ContainerDoubleTraitTest extends TestCase
 {
 
     public function servicesProvider()

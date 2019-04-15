@@ -12,6 +12,7 @@ namespace Cross\TestUtilsTest\Constraint;
 
 use Cross\TestUtils\Constraint\UsesTraits;
 use Cross\TestUtils\TestCase\AssertUsesTraitsTrait;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\Constraint\UsesTraits
@@ -23,19 +24,8 @@ use Cross\TestUtils\TestCase\AssertUsesTraitsTrait;
  * @group Cross.TestUtils.Constraint
  * @group Cross.TestUtils.Constraint.UsesTraitsTrait
  */
-class UsesTraitsTest extends \PHPUnit_Framework_TestCase
+class UsesTraitsTest extends TestCase
 {
-    public function testCreateInstanceSetsParentsAndInterfaces()
-    {
-        $traits = [
-            AssertUsesTraitsTrait::class,
-        ];
-
-        $target = new UsesTraits($traits);
-
-        static::assertAttributeEquals($traits, 'expectedTraits', $target);
-    }
-
     public function testCountReturnsExpectedValue()
     {
         $target = new UsesTraits(['one', 'two', 'three']);
@@ -68,12 +58,12 @@ class UsesTraitsTest extends \PHPUnit_Framework_TestCase
 
         try {
             $target->evaluate($subject);
-            static::fail('Expected exception of type ' . \PHPUnit_Framework_ExpectationFailedException::class . ' but none was thrown.');
-        } catch (\PHPUnit_Framework_ExpectationFailedException $e) {
+            static::fail('Expected exception of type ' . \PHPUnit\Framework\ExpectationFailedException::class . ' but none was thrown.');
+        } catch (\PHPUnit\Framework\ExpectationFailedException $e) {
             $message = $e->getMessage();
 
-            static::assertContains('+ ' . AssertUsesTraitsTrait::class, $message);
-            static::assertContains('- nonExistentTrait', $message);
+            static::assertStringContainsString('+ ' . AssertUsesTraitsTrait::class, $message);
+            static::assertStringContainsString('- nonExistentTrait', $message);
         }
     }
 
@@ -83,7 +73,7 @@ class UsesTraitsTest extends \PHPUnit_Framework_TestCase
         $class   = get_class($subject);
         $target = new UsesTraits([AssertUsesTraitsTrait::class]);
 
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage($class);
 
         $target->evaluate($class);
@@ -95,7 +85,7 @@ class UsesTraitsTest extends \PHPUnit_Framework_TestCase
         $class   = get_class($subject);
         $target = new UsesTraits([AssertUsesTraitsTrait::class]);
 
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage($class);
 
         $target->evaluate($subject);

@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\Exception;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\Exception\TemplatedMessageExceptionTrait
@@ -23,7 +24,7 @@ use Cross\TestUtils\Exception\InvalidUsageException;
  * @group Cross.TestUtils.Exception
  * @group Cross.TestUtils.Exception.TemplatedMessageExceptionTrait
  */
-class TemplatedMessageExceptionTraitTest extends \PHPUnit_Framework_TestCase
+class TemplatedMessageExceptionTraitTest extends TestCase
 {
     public function testCreateWithoutPrevious()
     {

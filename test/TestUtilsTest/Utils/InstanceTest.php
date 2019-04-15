@@ -12,8 +12,8 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\Utils;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
-
 use Cross\TestUtils\Utils\Instance;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\Utils\Instance
@@ -25,7 +25,7 @@ use Cross\TestUtils\Utils\Instance;
  * @group Cross.TestUtils.Utils
  * @group Cross.TestUtils.Utils.Instance
  */
-class InstanceTest extends \PHPUnit_Framework_TestCase
+class InstanceTest extends TestCase
 {
 
     public function createsReflectionData()

@@ -11,10 +11,10 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
+use PHPUnit\Framework\TestCase;
 use Cross\TestUtils\Exception\InvalidUsageException;
 
 use Cross\TestUtils\TestCase\TestSetterAndGetterTrait;
-use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\TestSetterAndGetterTrait
@@ -26,12 +26,8 @@ use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.TestSetterAndGetterTrait
  */
-class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
+class TestSetterAndGetterTraitTest extends TestCase
 {
-    use TestUsesTraitsTrait;
-
-    private $usesTraits = ['target' => TestSetterAndGetterTrait::class];
-
     public function testSetterAndGetterDataReturnsPropertyValue()
     {
         $target = new class { use TestSetterAndGetterTrait; private $setterAndGetter = [['prop', 'value']];};
@@ -113,11 +109,6 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
             [10, ['value' => 10]],
             [true, ['value' => true]],
             [new \stdClass, 'Must be array'],
-            [['property' => true], ['property' => ['prop', '__VALUE__']]],
-            [['property' => ['test']], ['property' => ['prop', 'test']]],
-            [['property' => ['name', 'test']], ['property' => ['name', 'test']]],
-            [['property' => 'name'], ['property' => ['name', '__VALUE__']]],
-
             [
                 ['setter_value' => '__SELF__'],
                 ['setter_value' => '__TARGET__']
@@ -154,11 +145,9 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
                 [
                     'value_object' => \stdClass::class,
                     'assert' => [$this, 'assertEquals'],
-                    'property_assert' => [$this, 'assertEquals'],
                 ],
                 [
                     'assert' => [$this, 'assertEquals'],
-                    'property_assert' => [$this, 'assertEquals'],
                 ],
             ],
 
@@ -176,7 +165,6 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
                 ['assert' => [$this, 'uncallable']],
                 'Invalid assert callback'
             ],
-
             [
                 ['nonexistent' => 'papp'],
                 ['value' => null],
@@ -214,7 +202,7 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
         };
 
         if (is_string($expect)) {
-            $this->expectException(\PHPUnit_Framework_Exception::class);
+            $this->expectException(\PHPUnit\Framework\Exception::class);
             $this->expectExceptionMessage($expect);
         }
 
@@ -252,14 +240,29 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
         $normalized = $target->testSetterAndGetter('prop', $spec);
 
         static::assertEquals([$target, 'callback'], $normalized['assert']);
+    }
+
+    public function testNormalizationAssertStringMapToAssertMethods()
+    {
+        $target = new class
+        {
+            use TestSetterAndGetterTrait;
+
+            public function testSetterAndGetter($name, $spec)
+            {
+                return $this->setterAndGetterNormalizeSpec($spec, $name, new \stdClass);
+            }
+
+            public function callback() {}
+        };
 
         $spec = [
-            'property_assert' => 'Same',
+            'assert' => 'someFunction'
         ];
 
         $normalized = $target->testSetterAndGetter('prop', $spec);
 
-        static::assertEquals([get_class($target), 'assertAttributeSame'], $normalized['property_assert']);
+        static::assertEquals([get_class($target), 'assert' . $spec['assert']], $normalized['assert']);
     }
 
     private function getConcreteTrait() : object
@@ -330,50 +333,6 @@ class TestSetterAndGetterTraitTest extends \PHPUnit_Framework_TestCase
 
         static::assertEquals(['value'], $trait->target->called['setprop'][0]);
         static::assertEquals('setterValue', $spec['setter_assert']());
-    }
-
-    public function testPropertyAssertion()
-    {
-        $trait = $this->getConcreteTrait();
-        $trait->target = new class
-        {
-            public $prop = null;
-
-            public function setprop($prop) { $this->prop = $prop; }
-        };
-
-        $spec = [
-            'value' => 'value',
-            'property' => 'prop',
-            'property_assert' => function($expect, $name, $target) { $target->expect = $expect; },
-        ];
-
-        $trait->testSetterAndGetter('prop', $spec);
-
-        static::assertEquals('value', $trait->target->prop);
-        static::assertEquals('value', $trait->target->expect);
-    }
-
-    public function testPropertyAssertionWithInjectedValue()
-    {
-        $trait = $this->getConcreteTrait();
-        $trait->target = new class
-        {
-            public $prop = null;
-
-            public function setprop($prop) { $this->prop = $prop; }
-        };
-
-        $spec = [
-            'value' => 'value',
-            'property' => ['prop', '__VALUE__'],
-            'property_assert' => function($expect, $name, $target) { $target->expect = $expect; },
-        ];
-
-        $trait->testSetterAndGetter('prop', $spec);
-
-        static::assertEquals('value', $trait->target->prop);
-        static::assertEquals('value', $trait->target->expect);
     }
 
     public function testGetterAssertion()

@@ -12,9 +12,8 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
-
 use Cross\TestUtils\TestCase\CreateProphecyTrait;
-
+use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 
 /**
@@ -27,11 +26,11 @@ use Prophecy\Prophecy\ObjectProphecy;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.CreateProphecyTrait
  */
-class CreateProphecyTraitTest extends \PHPUnit_Framework_TestCase
+class CreateProphecyTraitTest extends TestCase
 {
     private $target;
 
-    public function setup()
+    protected function setUp(): void
     {
         $this->target = new class
         {
