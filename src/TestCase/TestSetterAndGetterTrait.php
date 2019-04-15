@@ -48,19 +48,6 @@ use Cross\TestUtils\Utils\Target;
  * * 'value_callback': callable || method name (in the TestCase class)
  *                     The return value of that callback is taken as value for the test.
  *
- * * 'property': If there is no getter method, you may want to test, wether the setter has set
- *               a property on the SUT properly. This key may be
- *               - true:   The name equals the property to check
- *               - string: Name of property to hold the expected value
- *               - [{PropertyName, }expected value (if differs from 'value']
- *
- * * 'property_assert': callback for property assertion.
- *                      see 'assert'. But please note:
- *                      strings are 'converted' to 'assertAttribute*' methods.
- *                      The callback gets passed the expected value, the name of the
- *                      property ('property') and the SUT instance.
- *                      DEFAULT: 'equals' ( => static::assertAttributeEquals)
- *
  * * 'getter': - Name of getter method (a '*' gets replaced by the property name)
  *             - [GetterName, [arg, arg, ...]]
  *               Use this format to provide arguments to the getter method.
@@ -167,17 +154,7 @@ trait TestSetterAndGetterTrait
             }
         }
 
-        // Test property
-        if (null !== $spec['property']) {
-            [$propertyName, $propertyValue] = $spec['property'];
-            if ('__VALUE__' == $propertyValue) {
-                $propertyValue = $value;
-            }
-
-            $spec['property_assert']($propertyValue, $propertyName, $target);
-
-        // Test getter
-        } elseif (false !== $spec['getter'][0]) {
+        if (false !== $spec['getter'][0]) {
             $getter = str_replace('*', $name, $spec['getter'][0]);
             $getterValue = $target->$getter(...$spec['getter'][1]);
             $spec['assert']($value, $getterValue);
@@ -196,8 +173,6 @@ trait TestSetterAndGetterTrait
     private function setterAndGetterNormalizeSpec($spec, string $name, object $target): array
     {
         $normalized = [
-            'property' => null,
-            'property_assert' => [static::class, 'assertAttributeEquals'],
             'getter' => ["get*", []],
             'assert' => [static::class, 'assertEquals'],
             'setter' => ["set*", []],
@@ -215,29 +190,12 @@ trait TestSetterAndGetterTrait
         $err = __TRAIT__ . ': ' . get_class($this) . ': ';
 
         if (!is_array($spec)) {
-            throw new \PHPUnit_Framework_Exception($err . 'Invalid specification. Must be array.');
+            throw new \PHPUnit\Framework\Exception($err . 'Invalid specification. Must be array.');
         }
 
         foreach ($spec as $key => $value) {
             switch ($key) {
                 default:
-                    break;
-
-                case 'property':
-                    if (true === $value) {
-                        $value = [$name, '__VALUE__'];
-                        break;
-                    }
-
-                    if (is_array($value)) {
-                        $value = isset($value[1])
-                            ? [true === $value[0] ? $name : $value[0], $value[1]]
-                            : [$name, $value[0]]
-                        ;
-                        break;
-                    }
-
-                    $value = [$value, '__VALUE__'];
                     break;
 
                 case 'setter_value':
@@ -286,7 +244,7 @@ trait TestSetterAndGetterTrait
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit_Framework_Exception($err . 'Invalid value callback.');
+                        throw new \PHPUnit\Framework\Exception($err . 'Invalid value callback.');
                     }
 
                     $key = substr($key, 0, -9);
@@ -295,19 +253,17 @@ trait TestSetterAndGetterTrait
 
                 case 'setter_assert':
                 case 'assert':
-                case 'property_assert':
                     if (is_string($value)) {
                         if (method_exists($this, $value)) {
                             $value = [$this, $value];
                             break;
                         }
-                        $attr = 'property_assert' == $key ? 'Attribute' : '';
-                        $value = [static::class, "assert$attr$value"];
+                        $value = [static::class, "assert$value"];
                         break;
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit_Framework_Exception($err . 'Invalid assert callback.');
+                        throw new \PHPUnit\Framework\Exception($err . 'Invalid assert callback.');
                     }
 
                     break;

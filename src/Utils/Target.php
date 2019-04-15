@@ -67,7 +67,7 @@ final class Target
             if (is_object($target)) {
                 return $target;
             }
-            
+
             if (!$forceObject && is_string($target) && '!' != $target{0}) {
                 return $target;
             }
@@ -115,6 +115,6 @@ final class Target
             }
         }
 
-        throw new \PHPUnit_Framework_Exception('Could not find or create a target instance.');
+        throw new \PHPUnit\Framework\Exception('Could not find or create a target instance.');
     }
 }

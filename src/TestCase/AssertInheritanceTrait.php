@@ -30,8 +30,6 @@ trait AssertInheritanceTrait
      * @param iterable $parentsAndInterfaces
      * @param object|\ReflectionClass|string   $objectOrClass
      * @param string   $message
-     *
-     * @throws \PHPUnit_Framework_Exception
      */
     public static function assertInheritance(
         iterable $parentsAndInterfaces,

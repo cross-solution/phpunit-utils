@@ -24,7 +24,7 @@ use Cross\TestUtils\Utils\Instance;
 trait SetupTargetTrait
 {
 
-    public function setup()
+    protected function setUp(): void
     {
         $this->setupTarget();
     }
@@ -107,7 +107,7 @@ trait SetupTargetTrait
      *
      * @return void
      */
-    public function setupTarget(): void
+    private function setupTarget(): void
     {
         if (!property_exists($this, 'target')) {
             return;
