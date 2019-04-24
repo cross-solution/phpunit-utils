@@ -6,17 +6,18 @@
  * @license MIT
  * @copyright 2019 Cross Solution <http://cross-solution.de>
  */
-  
+
 declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\Constraint;
 
 use Cross\TestUtils\Constraint\ExtendsOrImplements;
 use Cross\TestUtils\TestCase\TestDefaultAttributesTrait;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\Constraint\ExtendsOrImplements
- * 
+ *
  * @covers \Cross\TestUtils\Constraint\ExtendsOrImplements
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  *
@@ -24,27 +25,8 @@ use Cross\TestUtils\TestCase\TestDefaultAttributesTrait;
  * @group Cross.TestUtils.Constraint
  * @group Cross.TestUtils.Constraint.ExtendsOrImplementsTest
  */
-class ExtendsOrImplementsTest extends \PHPUnit_Framework_TestCase
+class ExtendsOrImplementsTest extends TestCase
 {
-    use TestDefaultAttributesTrait;
-
-    private $defaultAttributes = [
-        ExtendsOrImplements::class,
-        'result' => [],
-        'parentsAndInterfaces' => [],
-    ];
-
-    public function testCreateInstanceSetsParentsAndInterfaces()
-    {
-        $classes = [
-            \stdClass::class
-        ];
-
-        $target = new ExtendsOrImplements($classes);
-
-        static::assertAttributeEquals($classes, 'parentsAndInterfaces', $target);
-    }
-
     public function testCountReturnsExpectedValue()
     {
         $target = new ExtendsOrImplements(['one', 'two', 'three']);
@@ -77,12 +59,12 @@ class ExtendsOrImplementsTest extends \PHPUnit_Framework_TestCase
 
         try {
             $target->evaluate($subject);
-            static::fail('Expected exception of type ' . \PHPUnit_Framework_ExpectationFailedException::class . ' but none was thrown.');
-        } catch (\PHPUnit_Framework_ExpectationFailedException $e) {
+            static::fail('Expected exception of type ' . \PHPUnit\Framework\ExpectationFailedException::class . ' but none was thrown.');
+        } catch (\PHPUnit\Framework\ExpectationFailedException $e) {
             $message = $e->getMessage();
 
-            static::assertContains('+ ' . \ArrayObject::class, $message);
-            static::assertContains('- ' . \Exception::class, $message);
+            static::assertStringContainsString('+ ' . \ArrayObject::class, $message);
+            static::assertStringContainsString('- ' . \Exception::class, $message);
         }
     }
 
@@ -91,7 +73,7 @@ class ExtendsOrImplementsTest extends \PHPUnit_Framework_TestCase
         $class = new class extends \ArrayObject {};
         $target = new ExtendsOrImplements([\Exception::class]);
 
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage(get_class($class));
 
         $target->evaluate($class);
@@ -103,7 +85,7 @@ class ExtendsOrImplementsTest extends \PHPUnit_Framework_TestCase
         $class   = get_class($subject);
         $target = new ExtendsOrImplements([\Exception::class]);
 
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage($class);
 
         $target->evaluate($class);

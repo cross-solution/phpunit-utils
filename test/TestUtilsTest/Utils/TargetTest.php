@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\Utils;
 
 use Cross\TestUtils\Utils\Target;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\Utils\Target
@@ -23,7 +24,7 @@ use Cross\TestUtils\Utils\Target;
  * @group Cross.TestUtils.Utils
  * @group Cross.TestUtils.Utils.Target
  */
-class TargetTest extends \PHPUnit_Framework_TestCase
+class TargetTest extends TestCase
 {
 
     public function testGetTargetInstanceFromMethod()
@@ -84,7 +85,7 @@ class TargetTest extends \PHPUnit_Framework_TestCase
     {
         $target = new class {};
 
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage('find or create');
 
         Target::get($target, [], []);

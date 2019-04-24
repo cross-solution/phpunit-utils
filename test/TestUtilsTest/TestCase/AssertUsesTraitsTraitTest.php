@@ -13,10 +13,11 @@ namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\Constraint\UsesTraits;
 use Cross\TestUtils\TestCase\AssertUsesTraitsTrait;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\AssertUsesTraitsTrait
- * 
+ *
  * @covers \Cross\TestUtils\TestCase\AssertUsesTraitsTrait
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  *
@@ -24,7 +25,7 @@ use Cross\TestUtils\TestCase\AssertUsesTraitsTrait;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.AssertUsesTraitsTrait
  */
-class AssertUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
+class AssertUsesTraitsTraitTest extends TestCase
 {
     public function testAssertMethodCallsAssertThat()
     {
@@ -44,9 +45,7 @@ class AssertUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
             }
         };
 
-        $usesTraitss = [
-            'class', 'trait'
-        ];
+        $usesTraitss = [];
 
         $message = 'test';
 
@@ -57,6 +56,32 @@ class AssertUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
         static::assertSame($object, $target::$object);
         static::assertEquals($message, $target::$message);
         static::assertInstanceOf(UsesTraits::class, $target::$constraint);
-        static::assertAttributeEquals($usesTraitss, 'expectedTraits', $target::$constraint);
+    }
+
+    public function testAssertMethodPassesCorrectValueOfTraits()
+    {
+        $target = new class
+        {
+            use AssertUsesTraitsTrait;
+
+            public static $traits;
+
+            public static function usesTraits(iterable $usesTraits): UsesTraits
+            {
+                static::$traits = $usesTraits;
+                return new UsesTraits($usesTraits);
+            }
+
+            public static function assertThat($object, $constraints, $message = '')
+            {
+
+            }
+        };
+
+        $traits = ['class', 'trait'];
+
+        $target->assertUsesTraits($traits, new \stdClass);
+
+        static::assertEquals($traits, $target::$traits);
     }
 }

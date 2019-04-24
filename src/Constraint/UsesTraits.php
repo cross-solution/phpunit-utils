@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\Constraint;
 
+use PHPUnit\Framework\Constraint\Constraint as BaseConstraint;
+
 /**
  * Constraint to assert that a class uses specific traits.
  *
@@ -18,7 +20,7 @@ namespace Cross\TestUtils\Constraint;
  * @since  0.26
  * @since  0.29 matches() accepts instances of \ReflectionClass.
  */
-class UsesTraits extends \PHPUnit_Framework_Constraint
+class UsesTraits extends BaseConstraint
 {
     /**
      * The traits that must be used.
@@ -42,7 +44,6 @@ class UsesTraits extends \PHPUnit_Framework_Constraint
     public function __construct(iterable $expectedTraits = [])
     {
         $this->expectedTraits = (array) $expectedTraits;
-        parent::__construct();
     }
 
     public function count(): int

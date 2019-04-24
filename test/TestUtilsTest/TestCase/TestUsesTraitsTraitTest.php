@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\TestCase;
 
+use PHPUnit\Framework\TestCase;
+
 use Cross\TestUtils\TestCase\AssertUsesTraitsTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 
@@ -24,7 +26,7 @@ use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.TestUsesTraitsTrait
  */
-class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
+class TestUsesTraitsTraitTest extends TestCase
 {
     public function testUsesCorrectTraits()
     {
@@ -38,7 +40,7 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionIfPropertyDoesNotExist()
     {
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage('is not defined');
 
         $target = new class { use TestUsesTraitsTrait; };
@@ -48,7 +50,7 @@ class TestUsesTraitsTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testThrowsExceptionIfPropertyIsNotAnArray()
     {
-        $this->expectException(\PHPUnit_Framework_Exception::class);
+        $this->expectException(\PHPUnit\Framework\Exception::class);
         $this->expectExceptionMessage('not an array');
 
         $target = new class { use TestUsesTraitsTrait; public $usesTraits = 'string'; };

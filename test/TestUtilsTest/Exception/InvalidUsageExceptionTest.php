@@ -11,12 +11,14 @@ declare(strict_types=1);
 
 namespace Cross\TestUtilsTest\Exception;
 
-use Cross\TestUtils\Exception\ExceptionInterface;
 use Cross\TestUtils\Exception\InvalidUsageException;
-use Cross\TestUtils\Exception\TemplatedMessageExceptionTrait;
+use PHPUnit\Framework\TestCase;
 
+use Cross\TestUtils\Exception\TemplatedMessageExceptionTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
 use Cross\TestUtils\TestCase\TestInheritanceTrait;
+
+use Cross\TestUtils\Exception\ExceptionInterface;
 
 /**
  * Tests for \Cross\TestUtils\Exception\InvalidUsageException
@@ -28,12 +30,12 @@ use Cross\TestUtils\TestCase\TestInheritanceTrait;
  * @group Cross.TestUtils.Exception
  * @group Cross.TestUtils.Exception.InvalidUsageException
  */
-class InvalidUsageExceptionTest extends \PHPUnit_Framework_TestCase
+class InvalidUsageExceptionTest extends TestCase
 {
     use TestInheritanceTrait, TestUsesTraitsTrait;
 
     private $target = InvalidUsageException::class;
-    private $inheritance = [ \PHPUnit_Framework_Exception::class, ExceptionInterface::class ];
+    private $inheritance = [ \PHPUnit\Framework\Exception::class, ExceptionInterface::class ];
     private $usesTraits  = [ TemplatedMessageExceptionTrait::class ];
 
 }

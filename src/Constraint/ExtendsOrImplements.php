@@ -11,13 +11,15 @@ declare(strict_types=1);
 
 namespace Cross\TestUtils\Constraint;
 
+use PHPUnit\Framework\Constraint\Constraint as BaseConstraint;
+
 /**
  * Constraint to assert the extending or implementing of specific classes and interfaces.
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  * @todo write tets.
  */
-class ExtendsOrImplements extends \PHPUnit_Framework_Constraint
+class ExtendsOrImplements extends BaseConstraint
 {
     /**
      * The FQCN of the classes and interfaces which the tested object
@@ -42,7 +44,6 @@ class ExtendsOrImplements extends \PHPUnit_Framework_Constraint
     public function __construct(iterable $parentsAndInterfaces = [])
     {
         $this->parentsAndInterfaces = (array) $parentsAndInterfaces;
-        parent::__construct();
     }
 
     public function count(): int

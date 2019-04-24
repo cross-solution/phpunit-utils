@@ -12,10 +12,12 @@ declare(strict_types=1);
 namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
+use PHPUnit\Framework\TestCase;
 
 use Cross\TestUtils\TestCase\AssertInheritanceTrait;
 use Cross\TestUtils\TestCase\TestInheritanceTrait;
 use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
+
 
 /**
  * Tests for \Cross\TestUtils\TestCase\TestInheritanceTrait
@@ -27,7 +29,7 @@ use Cross\TestUtils\TestCase\TestUsesTraitsTrait;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.TestInheritanceTrait
  */
-class TestInheritanceTraitTest extends \PHPUnit_Framework_TestCase
+class TestInheritanceTraitTest extends TestCase
 {
     use TestUsesTraitsTrait;
 

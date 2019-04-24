@@ -13,6 +13,7 @@ namespace Cross\TestUtilsTest\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
 use Cross\TestUtils\TestCase\SetupTargetTrait;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests for \Cross\TestUtils\TestCase\SetupTargetTrait
@@ -24,14 +25,16 @@ use Cross\TestUtils\TestCase\SetupTargetTrait;
  * @group Cross.TestUtils.TestCase
  * @group Cross.TestUtils.TestCase.SetupTargetTrait
  */
-class SetupTargetTraitTest extends \PHPUnit_Framework_TestCase
+class SetupTargetTraitTest extends TestCase
 {
 
     public function testSetupCallsSetupTarget()
     {
         $target = new class
         {
-            use SetupTargetTrait;
+            use SetupTargetTrait {
+                setUp as public;
+            }
 
             public $called=false;
 
@@ -51,7 +54,10 @@ class SetupTargetTraitTest extends \PHPUnit_Framework_TestCase
     {
         $target = new class
         {
-            use SetupTargetTrait;
+            use SetupTargetTrait {
+                setupTarget as public;
+            }
+
             public $called = false;
 
             private function setupTargetInstance($spec): ?object
@@ -155,7 +161,7 @@ class SetupTargetTraitTest extends \PHPUnit_Framework_TestCase
     {
         $target = new class($targetSpec, $options)
         {
-            use SetupTargetTrait;
+            use SetupTargetTrait { setupTarget as public; }
 
             private $target;
 
@@ -194,7 +200,7 @@ class SetupTargetTraitTest extends \PHPUnit_Framework_TestCase
     {
         return new class($spec)
         {
-            use SetupTargetTrait;
+            use SetupTargetTrait { setupTarget as public; }
 
             public $target;
 

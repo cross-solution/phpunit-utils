@@ -17,7 +17,7 @@ namespace Cross\TestUtils\Exception;
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
  * @todo write tests
  */
-class InvalidUsageException extends \PHPUnit_Framework_Exception implements ExceptionInterface
+class InvalidUsageException extends \PHPUnit\Framework\Exception implements ExceptionInterface
 {
     use TemplatedMessageExceptionTrait;
 }
