@@ -113,6 +113,10 @@ class TestSetterAndGetterTraitTest extends TestCase
                 ['setter_value' => '__SELF__'],
                 ['setter_value' => '__TARGET__']
             ],
+            [
+                ['value' => 'value', 'expect' => 'expect'],
+                ['value' => 'value', 'expect' => 'expect'],
+            ],
 
             [
                 [
@@ -134,10 +138,12 @@ class TestSetterAndGetterTraitTest extends TestCase
                 [
                     'value_object' => \stdClass::class,
                     'setter_value_object' => [\stdClass::class, ['arg']],
+                    'expect_object' => \stdClass::class,
                 ],
                 [
                     'value' => new \stdClass,
                     'setter_value' => new \stdClass,
+                    'expect' => new \stdClass,
                 ]
             ],
 
@@ -153,7 +159,7 @@ class TestSetterAndGetterTraitTest extends TestCase
 
             [
                 ['value_callback' => 'unallable'],
-                'Invalid value callback',
+                'Invalid callback',
             ],
 
             [
@@ -162,8 +168,13 @@ class TestSetterAndGetterTraitTest extends TestCase
             ],
 
             [
+                ['expect_callback' => function() { return 'calledback'; }],
+                ['expect' => 'calledback']
+            ],
+
+            [
                 ['assert' => [$this, 'uncallable']],
-                'Invalid assert callback'
+                'Invalid callback'
             ],
             [
                 ['nonexistent' => 'papp'],
@@ -350,5 +361,25 @@ class TestSetterAndGetterTraitTest extends TestCase
 
         static::assertEquals(['value'], $trait->target->called['setprop'][0]);
         static::assertEquals(['value', 'value'], $trait->target->called['assert'][0]);
+    }
+
+    public function testExpectedValueWillBePassedToGetterAssertion()
+    {
+        $trait = $this->getConcreteTrait();
+
+        $trait->target->return['getprop'][] = 'modifiedValueFromGetter';
+
+        $assertVars = [];
+        $spec = [
+            'value' => 'value',
+            'expect' => 'modifiedValue',
+            'assert' => function($expect, $actual) use (&$assertVars) {
+                $assertVars = [$expect, $actual];
+            }
+        ];
+
+        $trait->testSetterAndGetter('prop', $spec);
+
+        static::assertEquals(['modifiedValue', 'modifiedValueFromGetter'], $assertVars);
     }
 }
