@@ -3,9 +3,9 @@
 
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [License](#license)
+- [Installation](#Installation)
+- [Usage](#Usage)
+- [License](#License)
 
 <!-- /TOC -->
 
