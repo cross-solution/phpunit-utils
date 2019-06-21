@@ -48,6 +48,11 @@ use Cross\TestUtils\Utils\Target;
  * * 'value_callback': callable || method name (in the TestCase class)
  *                     The return value of that callback is taken as value for the test.
  *
+ * * 'expect': If the setter modifies the value, you can specify the expected value
+ *             for the getter here.
+ * * 'expect_object': see 'value_object'
+ * * 'expect_callback': see 'value_callback'
+ *
  * * 'getter': - Name of getter method (a '*' gets replaced by the property name)
  *             - [GetterName, [arg, arg, ...]]
  *               Use this format to provide arguments to the getter method.
@@ -146,8 +151,8 @@ trait TestSetterAndGetterTrait
 
         // Test setter
         if (false !== $spec['setter'][0]) {
-            $setter = str_replace('*', $name, $spec['setter'][0]);
-            $setterValue = $target->$setter($value, ...$spec['setter'][1]);
+            [$setter, $setterArgs] = $spec['setter'];
+            $setterValue = $target->$setter($value, ...$setterArgs);
 
             if ('__SETTER_AND_GETTER__' != $spec['setter_value']) {
                 $spec['setter_assert']($spec['setter_value'], $setterValue);
@@ -155,8 +160,13 @@ trait TestSetterAndGetterTrait
         }
 
         if (false !== $spec['getter'][0]) {
-            $getter = str_replace('*', $name, $spec['getter'][0]);
-            $getterValue = $target->$getter(...$spec['getter'][1]);
+            [$getter, $getterArgs] = $spec['getter'];
+            $getterValue = $target->$getter(...$getterArgs);
+
+            if ($spec['expect'] != '__SETTER_AND_GETTER__') {
+                $value = $spec['expect'];
+            }
+
             $spec['assert']($value, $getterValue);
         }
     }
@@ -173,12 +183,13 @@ trait TestSetterAndGetterTrait
     private function setterAndGetterNormalizeSpec($spec, string $name, object $target): array
     {
         $normalized = [
-            'getter' => ["get*", []],
+            'getter' => ["get$name", []],
             'assert' => [static::class, 'assertEquals'],
-            'setter' => ["set*", []],
+            'setter' => ["set$name", []],
             'setter_assert' => [static::class, 'assertEquals'],
             'setter_value' => '__SETTER_AND_GETTER__',
             'value' => null,
+            'expect' => '__SETTER_AND_GETTER__',
             'exception' => null,
         ];
 
@@ -213,10 +224,15 @@ trait TestSetterAndGetterTrait
                         $value = [$value, []];
                     }
 
+                    if (is_string($value[0])) {
+                        $value[0] = str_replace('*', $name, $value[0]);
+                    }
+
                     break;
 
                 case 'value_object':
                 case 'setter_value_object':
+                case 'expect_object':
                     if (!is_array($value)) {
                         $value = [$value];
                     }
@@ -228,23 +244,21 @@ trait TestSetterAndGetterTrait
 
                     $assertKey = str_replace('value', 'assert', $key);
 
-                    if (!isset($spec[$assertKey])) {
+                    if (!isset($spec[$assertKey]) && array_key_exists($assertKey, $normalized)) {
                         $normalized[$assertKey] = [static::class, 'assertSame'];
-                    }
-                    if ('value' == $key && !isset($spec['property_assert'])) {
-                        $normalized['property_assert'] = [static::class, 'assertAttributeSame'];
                     }
 
                     break;
 
                 case 'value_callback':
                 case 'setter_value_callback':
+                case 'expect_callback':
                     if (is_string($value)) {
                         $value = [$this, $value];
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit\Framework\Exception($err . 'Invalid value callback.');
+                        throw new \PHPUnit\Framework\Exception($err . 'Invalid callback for "' . $key . '".');
                     }
 
                     $key = substr($key, 0, -9);
@@ -263,7 +277,7 @@ trait TestSetterAndGetterTrait
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit\Framework\Exception($err . 'Invalid assert callback.');
+                        throw new \PHPUnit\Framework\Exception($err . 'Invalid callback for "' . $key . '".');
                     }
 
                     break;
