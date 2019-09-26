@@ -198,10 +198,8 @@ trait TestSetterAndGetterTrait
             return $normalized;
         }
 
-        $err = __TRAIT__ . ': ' . get_class($this) . ': ';
-
         if (!is_array($spec)) {
-            throw new \PHPUnit\Framework\Exception($err . 'Invalid specification. Must be array.');
+            throw InvalidUsageException::fromTrait(__TRAIT__, __CLASS__, 'Invalid specification. Must be array.');
         }
 
         foreach ($spec as $key => $value) {
@@ -258,7 +256,11 @@ trait TestSetterAndGetterTrait
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit\Framework\Exception($err . 'Invalid callback for "' . $key . '".');
+                        throw InvalidUsageException::fromTrait(
+                            __TRAIT__,
+                            __CLASS__,
+                            'Invalid callback for "' . $key . '".'
+                        );
                     }
 
                     $key = substr($key, 0, -9);
@@ -277,7 +279,11 @@ trait TestSetterAndGetterTrait
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit\Framework\Exception($err . 'Invalid callback for "' . $key . '".');
+                        throw InvalidUsageException::fromTrait(
+                            __TRAIT__,
+                            __CLASS__,
+                            'Invalid callback for "' . $key . '".'
+                        );
                     }
 
                     break;
