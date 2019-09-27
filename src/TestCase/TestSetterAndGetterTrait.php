@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * CROSS PHPUnit Utils
  *
@@ -7,11 +7,10 @@
  * @copyright  2019 Cross Solution <http://cross-solution.de>
  */
 
-declare(strict_types=1);
-
 namespace Cross\TestUtils\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
+use Cross\TestUtils\Utils\Instance;
 use Cross\TestUtils\Utils\Target;
 
 /**
@@ -35,6 +34,15 @@ use Cross\TestUtils\Utils\Target;
  * if <spec> is not an array, it is assumed as the 'value' key (= ['value' => <spec>])
  *
  * Available keys in the <spec> array:
+ *
+ * * 'target': Allows to specify a SUT for this particular test only.
+ *             The value must be either an object a string representing a FQCN
+ *             or an array [FQCN, arg, ...]
+ *
+ * * target_callback': Get the SUT via a callback.
+ *                     If a string is given, it is assumed that a method
+ *                     in the TestCase is meant.
+ *                     The callbakc must return an object.
  *
  * * 'value': The value to test the setter and getter with.
  *            First the setter will be called with the value as argument.
@@ -88,6 +96,8 @@ use Cross\TestUtils\Utils\Target;
  * @property array $setterAndGetter
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ *
+ * @since @#next#@ Allow SUT per individual test.
  */
 trait TestSetterAndGetterTrait
 {
@@ -123,16 +133,9 @@ trait TestSetterAndGetterTrait
             return;
         }
 
-        $target = Target::get(
-            $this,
-            ['getSetterAndGetterTarget', 'getTarget'],
-            ['setterAndGetterTarget', 'target'],
-            'setterAndGetter',
-            true
-        );
-
-        $spec = $this->setterAndGetterNormalizeSpec($spec, $name, $target);
-        $value = $spec['value'];
+        $target = $this->setterAndGetterGetTarget($spec);
+        $spec   = $this->setterAndGetterNormalizeSpec($spec, $name, $target);
+        $value  = $spec['value'];
 
         if ($spec['exception']) {
             if (is_array($spec['exception'])) {
@@ -172,8 +175,51 @@ trait TestSetterAndGetterTrait
     }
 
     /**
+     * @param string|array $spec
+     * @internal
+     */
+    private function setterAndGetterGetTarget($spec): object
+    {
+        if (isset($spec['target'])) {
+            return
+                is_object($spec['target'])
+                ? $spec['target']
+                : Instance::withMappedArguments($spec['target'], $this)
+            ;
+        }
+
+        if (isset($spec['target_callback'])) {
+            $cb = $spec['target_callback'];
+            if (is_string($cb)) {
+                $cb = [$this, $cb];
+            }
+
+            if (!is_callable($cb)) {
+                throw InvalidUsageException::fromTrait(__TRAIT__, __CLASS__, 'Invalid target callback.');
+            }
+
+            $target = $cb();
+
+            if (!is_object($target)) {
+                throw InvalidUsageException::fromTrait(__TRAIT__, __CLASS__, 'Target callback must return an object.');
+            }
+
+            return $target;
+        }
+
+        return Target::get(
+            $this,
+            ['getSetterAndGetterTarget', 'getTarget'],
+            ['setterAndGetterTarget', 'target'],
+            'setterAndGetter',
+            true
+        );
+    }
+
+    /**
      * Normalize the test specification.
      *
+     * @internal
      * @param array|string $spec
      * @param string $name
      * @param object $target
