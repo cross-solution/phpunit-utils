@@ -28,10 +28,21 @@
     }
   },
   "scripts": {
-    "test": "vendor/bin/phpunit"
+    "test": "vendor/bin/phpunit",
+    "test-coverage-clover": "vendor/bin/phpunit --coverage-clover=coverage.clover.xml",
+    "test-coverage-html": "vendor/bin/phpunit --coverage-html=test/coverage",
+    "lint": "vendor/bin/phpcs --standard=phpcs.xml src/*"
+  },
+  "scripts-descriptions": {
+    "test": "Runs the phpunit testsuite",
+    "test-coverage-clover": "Runs the phpunit testsuite and generates coverage in the clover format in the file 'coverage.clover.xml'",
+    "test-coverage-html": "Runs the phpunit testsuite and generates coverage in html format in the directory 'test/coverage'.",
+    "lint": "Runs PHP_CodeSniffer on 'src/*'"
   },
   "require-dev": {
     "php-mock/php-mock-prophecy": "^0.0.2",
-    "psr/container": "^1.0"
+    "psr/container": "^1.0",
+    "squizlabs/php_codesniffer": ">=3.4 <3.5.0",
+    "slevomat/coding-standard": "^5.0"
   }
 }

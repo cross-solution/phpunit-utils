@@ -1,15 +1,9 @@
-# Text-Editor backup files
-*~
-
 # ignore dependencies
 vendor
 
 # ignore test/coverage reports
 test/coverage
+coverage.clover.xml
 
 # ignore phpunit cache
 .phpunit.result.cache
-
-# Ignore IDEs
-.idea
-.atom
