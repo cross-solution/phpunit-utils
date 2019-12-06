@@ -190,7 +190,8 @@ trait TestSetterAndGetterTrait
 
         if (isset($spec['target_callback'])) {
             $cb = $spec['target_callback'];
-            if (is_string($cb)) {
+
+            if (is_string($cb) && !is_callable($cb)) {
                 $cb = [$this, $cb];
             }
 
