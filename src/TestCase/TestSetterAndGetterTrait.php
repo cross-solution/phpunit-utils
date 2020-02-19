@@ -298,7 +298,7 @@ trait TestSetterAndGetterTrait
                 case 'value_callback':
                 case 'setter_value_callback':
                 case 'expect_callback':
-                    if (is_string($value)) {
+                    if (is_string($value) && !is_callable($value)) {
                         $value = [$this, $value];
                     }
 
