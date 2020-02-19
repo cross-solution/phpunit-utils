@@ -259,9 +259,6 @@ trait TestSetterAndGetterTrait
                 case 'setter_value':
                     if ('__SELF__' === $value) {
                         $value = $target;
-                        if (!isset($spec['setter_assert'])) {
-                            $normalized['setter_assert'] = [static::class, 'assertSame'];
-                        }
                     }
                     break;
 
@@ -288,13 +285,6 @@ trait TestSetterAndGetterTrait
                     $args  = $value[1] ?? [];
                     $key = substr($key, 0, -7);
                     $value = new $class(...$args);
-
-                    $assertKey = str_replace('value', 'assert', $key);
-
-                    if (!isset($spec[$assertKey]) && array_key_exists($assertKey, $normalized)) {
-                        $normalized[$assertKey] = [static::class, 'assertSame'];
-                    }
-
                     break;
 
                 case 'value_callback':
