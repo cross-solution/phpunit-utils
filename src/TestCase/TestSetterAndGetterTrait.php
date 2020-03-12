@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php
 /**
  * CROSS PHPUnit Utils
  *
@@ -6,6 +6,8 @@
  * @license    MIT
  * @copyright  2019 Cross Solution <http://cross-solution.de>
  */
+
+declare(strict_types=1);
 
 namespace Cross\TestUtils\TestCase;
 
