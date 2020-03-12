@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Cross\TestUtils\TestCase;
 
 use Cross\TestUtils\Exception\InvalidUsageException;
+use Cross\TestUtils\Utils\Instance;
 use Cross\TestUtils\Utils\Target;
 
 /**
@@ -35,6 +36,15 @@ use Cross\TestUtils\Utils\Target;
  * if <spec> is not an array, it is assumed as the 'value' key (= ['value' => <spec>])
  *
  * Available keys in the <spec> array:
+ *
+ * * 'target': Allows to specify a SUT for this particular test only.
+ *             The value must be either an object a string representing a FQCN
+ *             or an array [FQCN, arg, ...]
+ *
+ * * target_callback': Get the SUT via a callback.
+ *                     If a string is given, it is assumed that a method
+ *                     in the TestCase is meant.
+ *                     The callbakc must return an object.
  *
  * * 'value': The value to test the setter and getter with.
  *            First the setter will be called with the value as argument.
@@ -88,6 +98,8 @@ use Cross\TestUtils\Utils\Target;
  * @property array $setterAndGetter
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ *
+ * @since @#next#@ Allow SUT per individual test.
  */
 trait TestSetterAndGetterTrait
 {
@@ -123,16 +135,9 @@ trait TestSetterAndGetterTrait
             return;
         }
 
-        $target = Target::get(
-            $this,
-            ['getSetterAndGetterTarget', 'getTarget'],
-            ['setterAndGetterTarget', 'target'],
-            'setterAndGetter',
-            true
-        );
-
-        $spec = $this->setterAndGetterNormalizeSpec($spec, $name, $target);
-        $value = $spec['value'];
+        $target = $this->setterAndGetterGetTarget($spec);
+        $spec   = $this->setterAndGetterNormalizeSpec($spec, $name, $target);
+        $value  = $spec['value'];
 
         if ($spec['exception']) {
             if (is_array($spec['exception'])) {
@@ -172,8 +177,52 @@ trait TestSetterAndGetterTrait
     }
 
     /**
+     * @param string|array $spec
+     * @internal
+     */
+    private function setterAndGetterGetTarget($spec): object
+    {
+        if (isset($spec['target'])) {
+            return
+                is_object($spec['target'])
+                ? $spec['target']
+                : Instance::withMappedArguments($spec['target'], $this)
+            ;
+        }
+
+        if (isset($spec['target_callback'])) {
+            $cb = $spec['target_callback'];
+
+            if (is_string($cb) && !is_callable($cb)) {
+                $cb = [$this, $cb];
+            }
+
+            if (!is_callable($cb)) {
+                throw InvalidUsageException::fromTrait(__TRAIT__, __CLASS__, 'Invalid target callback.');
+            }
+
+            $target = $cb();
+
+            if (!is_object($target)) {
+                throw InvalidUsageException::fromTrait(__TRAIT__, __CLASS__, 'Target callback must return an object.');
+            }
+
+            return $target;
+        }
+
+        return Target::get(
+            $this,
+            ['getSetterAndGetterTarget', 'getTarget'],
+            ['setterAndGetterTarget', 'target'],
+            'setterAndGetter',
+            true
+        );
+    }
+
+    /**
      * Normalize the test specification.
      *
+     * @internal
      * @param array|string $spec
      * @param string $name
      * @param object $target
@@ -198,10 +247,8 @@ trait TestSetterAndGetterTrait
             return $normalized;
         }
 
-        $err = __TRAIT__ . ': ' . get_class($this) . ': ';
-
         if (!is_array($spec)) {
-            throw new \PHPUnit\Framework\Exception($err . 'Invalid specification. Must be array.');
+            throw InvalidUsageException::fromTrait(__TRAIT__, __CLASS__, 'Invalid specification. Must be array.');
         }
 
         foreach ($spec as $key => $value) {
@@ -253,12 +300,16 @@ trait TestSetterAndGetterTrait
                 case 'value_callback':
                 case 'setter_value_callback':
                 case 'expect_callback':
-                    if (is_string($value)) {
+                    if (is_string($value) && !is_callable($value)) {
                         $value = [$this, $value];
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit\Framework\Exception($err . 'Invalid callback for "' . $key . '".');
+                        throw InvalidUsageException::fromTrait(
+                            __TRAIT__,
+                            __CLASS__,
+                            'Invalid callback for "' . $key . '".'
+                        );
                     }
 
                     $key = substr($key, 0, -9);
@@ -277,7 +328,11 @@ trait TestSetterAndGetterTrait
                     }
 
                     if (!is_callable($value)) {
-                        throw new \PHPUnit\Framework\Exception($err . 'Invalid callback for "' . $key . '".');
+                        throw InvalidUsageException::fromTrait(
+                            __TRAIT__,
+                            __CLASS__,
+                            'Invalid callback for "' . $key . '".'
+                        );
                     }
 
                     break;

@@ -101,6 +101,110 @@ class TestSetterAndGetterTraitTest extends TestCase
 
     }
 
+    public function provideIndividualTargetData()
+    {
+        $obj = new \stdClass;
+        $obj2 = new class ('', '') {
+            public $arg1;
+            public $arg2;
+            public function __construct($arg1, $arg2)
+            {
+                $this->arg1 = $arg1;
+                $this->arg2 = $arg2;
+            }
+        };
+
+        return [
+            [
+                ['target' => \stdClass::class],
+                \stdClass::class
+            ],
+            [
+                ['target' => $obj],
+                $obj
+            ],
+            [
+                ['target' => [get_class($obj2), 'arg1', 'arg2']],
+                [get_class($obj2), ['arg1' => 'arg1', 'arg2' => 'arg2']]
+            ],
+
+            [
+                ['target_callback' => function () use ($obj) { return $obj; }],
+                $obj,
+            ],
+            [
+                ['target_callback' => 'getSut'],
+                \stdClass::class,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider provideIndividualTargetData
+     */
+    public function testAllowsProvidingIndividualTarget(array $spec, $expect): void
+    {
+        $target = new class {
+            use TestSetterAndGetterTrait {
+                TestSetterAndGetterTrait::setterAndGetterGetTarget as originalGetTarget;
+            }
+
+            public $sut;
+
+            public function testSetterAndGetter($name, $spec=null) {
+                $this->testSetterAndGetterGetTarget($spec);
+            }
+
+            private function testSetterAndGetterGetTarget($spec) {
+                $this->sut = $this->originalGetTarget($spec);
+            }
+
+            public function getSut() {
+                return new \stdClass;
+            }
+        };
+
+        $target->testSetterAndGetter('test', $spec);
+
+        if (is_object($expect)) {
+            static::assertSame($target->sut, $expect);
+        } elseif (is_array($expect)) {
+            static::assertInstanceOf($expect[0], $target->sut);
+            foreach ($expect[1] as $name => $value) {
+                static::assertEquals($value, $target->sut->$name);
+            }
+        } else {
+            static::assertInstanceOf($expect, $target->sut);
+        }
+    }
+
+    public function testSpecifyInvalidTargetCallbackThrowsException()
+    {
+        $target = new class {
+            use TestSetterAndGetterTrait;
+        };
+
+        $this->expectException(InvalidUsageException::class);
+        $this->expectExceptionMessage('Invalid target callback');
+
+        $target->testSetterAndGetter('test', ['target_callback' => 'invalidCallback']);
+    }
+
+    public function testAssureTargetCallbackReturnsObject()
+    {
+        $target = new class {
+            use TestSetterAndGetterTrait;
+
+            public function sut() {
+                return 'not an object';
+            }
+        };
+
+        $this->expectException(InvalidUsageException::class);
+        $this->expectExceptionMessage('must return an object');
+
+        $target->testSetterAndGetter('test', ['target_callback' => 'sut']);
+    }
 
     public function normalizationData() : array
     {
@@ -213,7 +317,7 @@ class TestSetterAndGetterTraitTest extends TestCase
         };
 
         if (is_string($expect)) {
-            $this->expectException(\PHPUnit\Framework\Exception::class);
+            $this->expectException(InvalidUsageException::class);
             $this->expectExceptionMessage($expect);
         }
 
