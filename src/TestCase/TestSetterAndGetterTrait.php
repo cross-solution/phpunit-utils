@@ -157,7 +157,7 @@ trait TestSetterAndGetterTrait
             [$setter, $setterArgs] = $spec['setter'];
             $setterValue = $target->$setter($value, ...$setterArgs);
 
-            if ('__SETTER_AND_GETTER__' != $spec['setter_value']) {
+            if ($spec['setter_value'] !== '__SETTER_AND_GETTER__') {
                 $spec['setter_assert']($spec['setter_value'], $setterValue);
             }
         }
@@ -166,7 +166,7 @@ trait TestSetterAndGetterTrait
             [$getter, $getterArgs] = $spec['getter'];
             $getterValue = $target->$getter(...$getterArgs);
 
-            if ($spec['expect'] != '__SETTER_AND_GETTER__') {
+            if ($spec['expect'] !== '__SETTER_AND_GETTER__') {
                 $value = $spec['expect'];
             }
 
@@ -255,7 +255,7 @@ trait TestSetterAndGetterTrait
                     break;
 
                 case 'setter_value':
-                    if ('__SELF__' == $value) {
+                    if ('__SELF__' === $value) {
                         $value = $target;
                         if (!isset($spec['setter_assert'])) {
                             $normalized['setter_assert'] = [static::class, 'assertSame'];
