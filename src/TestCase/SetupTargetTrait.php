@@ -127,7 +127,7 @@ trait SetupTargetTrait
         $nameParts = explode(' ', $this->getName());
         $name      = reset($nameParts);
         $set       = end($nameParts);
-        $set       = '#' == $set{0} || '"' == $set{0} ? trim($set, '"') : '';
+        $set       = '#' == $set[0] || '"' == $set[0] ? trim($set, '"') : '';
 
         foreach ($specs as $spec) {
             $for = isset($spec['for']) ? (array) $spec['for'] : ['*'];
