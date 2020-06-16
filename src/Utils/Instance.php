@@ -17,6 +17,8 @@ use Cross\TestUtils\Exception\InvalidUsageException;
  * Creates object instances.
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
+ *
+ * @since 2.x create reflection via array spec
  */
 final class Instance
 {
@@ -50,6 +52,9 @@ final class Instance
      * if __$fqcn__ is a string and starts with "!", a \ReflectionClass
      * object is returned.
      *
+     * if __$fqcn__ is an array with the key "!", a \ReflectionClass
+     * object is created from the value of that key (which must be an FQCN or an object)
+     *
      * if __$fqcn__ is an array, the first element is used as FQCN and
      * all other elements are used as constructor arguments - other
      * arguments passed in are ignored.
@@ -58,12 +63,18 @@ final class Instance
      * @param  mixed ...$arguments
      *
      * @return object
+     *
+     * @since 2.x Create reflection via array spec (['!' => FQCN/Object])
      */
     public static function create($fqcn, ...$arguments): object
     {
         if (is_array($fqcn)) {
-            $arguments = array_slice($fqcn, 1);
-            $fqcn = reset($fqcn);
+            if (isset($fqcn['!']) && is_string($fqcn['!'])) {
+                return self::reflection($fqcn['!']);
+            } else {
+                $arguments = array_slice($fqcn, 1);
+                $fqcn = reset($fqcn);
+            }
         }
 
         if (!is_string($fqcn)) {

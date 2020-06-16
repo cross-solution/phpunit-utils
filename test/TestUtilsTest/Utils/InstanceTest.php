@@ -68,7 +68,8 @@ class InstanceTest extends TestCase
             [$fqcn, [], $fqcn],
             [$fqcn, ['arg1'], $fqcn, 'arg1'],
             [$fqcn, ['arg1'], [$fqcn, 'arg1'], 'arg2'],
-            [\ReflectionClass::class, false, "!$fqcn"]
+            [\ReflectionClass::class, false, "!$fqcn"],
+            [\ReflectionClass::class, false, ['!' => $fqcn]],
         ];
     }
 
