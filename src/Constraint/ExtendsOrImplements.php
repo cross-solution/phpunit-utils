@@ -1,10 +1,11 @@
 <?php
+
 /**
  * CROSS PHPUnit Utils
  *
- * @filesource
- * @license    MIT
- * @copyright  2019 Cross Solution <http://cross-solution.de>
+ * @see       https://github.com/cross-solution/phpunit-utils for the canonical source repository
+ * @copyright https://github.com/cross-solution/phpunit-utils/blob/master/COPYRIGHT
+ * @license   https://github.com/cross-solution/phpunit-utils/blob/master/LICENSE MIT
  */
 
 declare(strict_types=1);
@@ -17,7 +18,6 @@ use PHPUnit\Framework\Constraint\Constraint as BaseConstraint;
  * Constraint to assert the extending or implementing of specific classes and interfaces.
  *
  * @author Mathias Gelhausen <gelhausen@cross-solution.de>
- * @todo write tets.
  */
 class ExtendsOrImplements extends BaseConstraint
 {
