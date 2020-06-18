@@ -70,10 +70,6 @@ class TargetTest extends TestCase
         $target = new class
         {
             public $classes = ['TestTarget', 'other', 'values'];
-            public function test()
-            {
-                return $this->getTargetInstance([], [], 'classes');
-            }
         };
 
         $actual = Target::get($target, [], [], 'classes');
