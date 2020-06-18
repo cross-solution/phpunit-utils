@@ -315,6 +315,7 @@ class ContainerDoubleTraitTest extends TestCase
     public function testThrowsExceptionIfInterfaceOrClassIsNotDefined()
     {
 
+        /** @var \phpmock\prophecy\FunctionProphecy $func */
         $func = (new PHPProphet)->prophesize('Cross\TestUtils\TestCase');
         $func->interface_exists(Argument::any())->willReturn(false);
         $func->class_exists(Argument::any())->willReturn(false);

@@ -33,7 +33,7 @@ trait TemplatedMessageExceptionTrait
      *
      * @return \Exception
      */
-    public static function create(...$args): \Exception
+    public static function create(...$args): self
     {
         $ex      = end($args) instanceof \Throwable ? array_pop($args) : null;
         $message = sprintf(...$args);
