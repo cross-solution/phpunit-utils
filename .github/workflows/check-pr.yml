@@ -1,0 +1,29 @@
+name: Check pull request
+on:
+  pull_request:
+    branches:
+      - '**.x'
+jobs:
+  testing:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [7.2, 7.3, 7.4]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP with composer
+        uses: actions/setup-php
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Lint syntax
+        run: composer lint
+
+      - name: Run unit tests
+        run: composer test
