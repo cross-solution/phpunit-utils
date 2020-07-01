@@ -3,6 +3,9 @@ on:
   pull_request:
     branches:
       - '**.x'
+  push:
+    branches:
+      - '**.x'
 jobs:
   testing:
     name: PHP ${{ matrix.php }}
@@ -23,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: composer install
 
-      - name: Lint syntax
+      - name: Lint syntax / code convention
         run: composer lint
 
       - name: Run unit tests
