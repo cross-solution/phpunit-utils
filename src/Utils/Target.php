@@ -69,7 +69,7 @@ final class Target
                 return $target;
             }
 
-            if (!$forceObject && is_string($target) && '!' != $target{0}) {
+            if (!$forceObject && is_string($target) && '!' != $target[0]) {
                 return $target;
             }
 

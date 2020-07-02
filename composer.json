@@ -31,7 +31,7 @@
     "test": "vendor/bin/phpunit",
     "test-coverage-clover": "vendor/bin/phpunit --coverage-clover=coverage.clover.xml",
     "test-coverage-html": "vendor/bin/phpunit --coverage-html=test/coverage",
-    "lint": "vendor/bin/phpcs --standard=phpcs.xml src/*"
+    "lint": "vendor/bin/phpcs -v --standard=phpcs.xml src/*"
   },
   "scripts-descriptions": {
     "test": "Runs the phpunit testsuite",

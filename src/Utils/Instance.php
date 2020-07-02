@@ -75,7 +75,7 @@ final class Instance
             );
         }
 
-        if ('!' == $fqcn{0}) {
+        if ('!' == $fqcn[0]) {
             return self::reflection(substr($fqcn, 1));
         }
 
@@ -143,7 +143,7 @@ final class Instance
                     break;
 
                 // '@function'
-                case is_string($value) && '@' == $value{0}:
+                case is_string($value) && '@' == $value[0]:
                     $callback = ltrim($value, '@');
                     break;
 
