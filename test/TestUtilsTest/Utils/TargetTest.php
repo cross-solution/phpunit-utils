@@ -1,10 +1,11 @@
 <?php
+
 /**
- * CROSS PHPunit Utils
+ * CROSS PHPUnit Utils
  *
- * @filesource
- * @copyright 2019 Cross Solution <https://www.cross-solution.de>
- * @license MIT
+ * @see       https://github.com/cross-solution/phpunit-utils for the canonical source repository
+ * @copyright https://github.com/cross-solution/phpunit-utils/blob/master/COPYRIGHT
+ * @license   https://github.com/cross-solution/phpunit-utils/blob/master/LICENSE MIT
  */
 
 declare(strict_types=1);
@@ -69,10 +70,6 @@ class TargetTest extends TestCase
         $target = new class
         {
             public $classes = ['TestTarget', 'other', 'values'];
-            public function test()
-            {
-                return $this->getTargetInstance([], [], 'classes');
-            }
         };
 
         $actual = Target::get($target, [], [], 'classes');

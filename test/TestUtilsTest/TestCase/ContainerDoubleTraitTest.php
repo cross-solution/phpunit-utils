@@ -1,10 +1,11 @@
 <?php
+
 /**
  * CROSS PHPUnit Utils
  *
- * @filesource
- * @license MIT
- * @copyright  2019 Cross Solution <http://cross-solution.de>
+ * @see       https://github.com/cross-solution/phpunit-utils for the canonical source repository
+ * @copyright https://github.com/cross-solution/phpunit-utils/blob/master/COPYRIGHT
+ * @license   https://github.com/cross-solution/phpunit-utils/blob/master/LICENSE MIT
  */
 
 declare(strict_types=1);
@@ -314,6 +315,7 @@ class ContainerDoubleTraitTest extends TestCase
     public function testThrowsExceptionIfInterfaceOrClassIsNotDefined()
     {
 
+        /** @var \phpmock\prophecy\FunctionProphecy $func */
         $func = (new PHPProphet)->prophesize('Cross\TestUtils\TestCase');
         $func->interface_exists(Argument::any())->willReturn(false);
         $func->class_exists(Argument::any())->willReturn(false);
